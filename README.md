@@ -61,7 +61,7 @@ kind: source
 spec:
   name: "crowdstrike"
   registry: "github"
-  path: "justmiles/crowdstrike"
+  path: "nronix/crowdstrike"
   version: "v2.0.0"
   # use this to enable incremental syncing - unimplemented
   # backend_options:
@@ -70,7 +70,12 @@ spec:
   destinations: ["sqlite"]
   tables: ["*"]
   spec:
-    # plugin spec section
+    Falcon:
+      - ClientCloud: "us-gov-1"
+        Name: "Any Name"
+        ClientId: ""
+        ClientSecret: ""
+        MemberCid: ""
 ```
 
 ### Plugin Spec
