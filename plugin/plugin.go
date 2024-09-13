@@ -3,6 +3,6 @@ package plugin
 var (
 	Name    = "crowdstrike"
 	Kind    = "source"
-	Team    = "justmiles"
-	Version = "development"
+	Team    = "nronix"
+	Version = "1.0.0"
 )

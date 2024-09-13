@@ -3,8 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
-
-	"github.com/justmiles/cq-source-crowdstrike/client"
+	"github.com/nronix/cq-source-crowdstrike/client"
 
 	"github.com/cloudquery/plugin-sdk/v4/schema"
 	"github.com/cloudquery/plugin-sdk/v4/transformers"
@@ -17,11 +16,12 @@ func Hosts() *schema.Table {
 		Name:      "crowdstrike_falcon_hosts",
 		Resolver:  fetchHosts,
 		Transform: transformers.TransformWithStruct(&models.DeviceapiDeviceSwagger{}, transformers.WithPrimaryKeys("DeviceID")),
+		Multiplex: client.AccountMultiplex,
 	}
 }
 
 func fetchHosts(ctx context.Context, meta schema.ClientMeta, parent *schema.Resource, res chan<- any) error {
-	c := meta.(*client.Client)
+	c := meta.(*client.Client).Account
 
 	var offset int64 = 0
 	var limit int64 = 100

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/justmiles/cq-source-crowdstrike/client"
+	"github.com/nronix/cq-source-crowdstrike/client"
 
 	"github.com/cloudquery/plugin-sdk/v4/schema"
 	"github.com/cloudquery/plugin-sdk/v4/transformers"
@@ -18,11 +18,12 @@ func DiscoverHosts() *schema.Table {
 		Name:      "crowdstrike_falcon_discover_hosts",
 		Resolver:  fetchDiscoverHosts,
 		Transform: transformers.TransformWithStruct(&models.DomainDiscoverAPIHost{}, transformers.WithPrimaryKeys("ID")),
+		Multiplex: client.AccountMultiplex,
 	}
 }
 
 func fetchDiscoverHosts(ctx context.Context, meta schema.ClientMeta, parent *schema.Resource, res chan<- any) error {
-	c := meta.(*client.Client)
+	c := meta.(*client.Client).Account
 	limit := int64(100)
 	filter := "entity_type:'managed'"
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/justmiles/cq-source-crowdstrike/client"
+	"github.com/nronix/cq-source-crowdstrike/client"
 
 	"github.com/cloudquery/plugin-sdk/v4/schema"
 	"github.com/cloudquery/plugin-sdk/v4/transformers"
@@ -18,11 +18,12 @@ func Vulnerabilities() *schema.Table {
 		Name:      "crowdstrike_falcon_vulnerabilities",
 		Resolver:  fetchVulnerabilities,
 		Transform: transformers.TransformWithStruct(&models.DomainBaseAPIVulnerabilityV2{}, transformers.WithPrimaryKeys("ID")),
+		Multiplex: client.AccountMultiplex,
 	}
 }
 
 func fetchVulnerabilities(ctx context.Context, meta schema.ClientMeta, parent *schema.Resource, res chan<- any) error {
-	c := meta.(*client.Client)
+	c := meta.(*client.Client).Account
 
 	lastSeen := (*string)(nil)
 	for {

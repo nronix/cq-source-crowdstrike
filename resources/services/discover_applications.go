@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/justmiles/cq-source-crowdstrike/client"
+	"github.com/nronix/cq-source-crowdstrike/client"
 
 	"github.com/cloudquery/plugin-sdk/v4/schema"
 	"github.com/cloudquery/plugin-sdk/v4/transformers"
@@ -18,11 +18,12 @@ func DiscoverApps() *schema.Table {
 		Name:      "crowdstrike_falcon_discover_applications",
 		Resolver:  fetchDiscoverApps,
 		Transform: transformers.TransformWithStruct(&models.DomainDiscoverAPIApplication{}, transformers.WithPrimaryKeys("ID")),
+		Multiplex: client.AccountMultiplex,
 	}
 }
 
 func getHostIds(ctx context.Context, meta schema.ClientMeta, filter string) <-chan []string {
-	c := meta.(*client.Client)
+	c := meta.(*client.Client).Account
 	hostIds := make(chan []string)
 
 	go func() {
@@ -57,7 +58,7 @@ func getHostIds(ctx context.Context, meta schema.ClientMeta, filter string) <-ch
 }
 
 func getAppIds(ctx context.Context, meta schema.ClientMeta, hostID string) <-chan []string {
-	c := meta.(*client.Client)
+	c := meta.(*client.Client).Account
 	//var appIds []string
 	appIds := make(chan []string)
 
@@ -97,7 +98,7 @@ func getAppIds(ctx context.Context, meta schema.ClientMeta, hostID string) <-cha
 func fetchDiscoverApps(ctx context.Context, meta schema.ClientMeta, parent *schema.Resource, res chan<- any) error {
 	hostFilter := "entity_type:'managed'"
 	//var appIDsbatch []string
-	c := meta.(*client.Client)
+	c := meta.(*client.Client).Account
 
 	for hostIDsbatch := range getHostIds(ctx, meta, hostFilter) {
 		for _, hostID := range hostIDsbatch {

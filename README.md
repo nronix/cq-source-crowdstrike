@@ -52,7 +52,6 @@ CloudQuery should only have _read_ access to CrowdStrike resources. The intent i
 - Spotlight vulnerabilities
 - Event streams
 - User management
-- Zero Trust Assessment
 
 ### Example
 

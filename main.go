@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/cloudquery/plugin-sdk/v4/serve"
-	"github.com/justmiles/cq-source-crowdstrike/resources/plugin"
+	"github.com/nronix/cq-source-crowdstrike/resources/plugin"
 )
 
 func main() {

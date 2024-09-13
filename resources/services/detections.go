@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/justmiles/cq-source-crowdstrike/client"
+	"github.com/nronix/cq-source-crowdstrike/client"
 
 	"github.com/cloudquery/plugin-sdk/v4/schema"
 	"github.com/cloudquery/plugin-sdk/v4/transformers"
@@ -17,11 +17,12 @@ func Detections() *schema.Table {
 		Name:      "crowdstrike_falcon_detections",
 		Resolver:  fetchDetections,
 		Transform: transformers.TransformWithStruct(&models.DomainAPIDetectionDocument{}, transformers.WithPrimaryKeys("DetectionID")),
+		Multiplex: client.AccountMultiplex,
 	}
 }
 
 func fetchDetections(ctx context.Context, meta schema.ClientMeta, parent *schema.Resource, res chan<- any) error {
-	c := meta.(*client.Client)
+	c := meta.(*client.Client).Account
 
 	queryOK, err := c.CrowdStrike.Detects.QueryDetects(&detects.QueryDetectsParams{
 		Context: ctx,

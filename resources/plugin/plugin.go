@@ -2,7 +2,7 @@ package plugin
 
 import (
 	"github.com/cloudquery/plugin-sdk/v4/plugin"
-	internalPlugin "github.com/justmiles/cq-source-crowdstrike/plugin"
+	internalPlugin "github.com/nronix/cq-source-crowdstrike/plugin"
 )
 
 func Plugin() *plugin.Plugin {

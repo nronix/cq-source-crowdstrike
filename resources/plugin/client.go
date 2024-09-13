@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
-
 	"github.com/cloudquery/plugin-sdk/v4/docs"
 	"github.com/cloudquery/plugin-sdk/v4/message"
 	"github.com/cloudquery/plugin-sdk/v4/plugin"
@@ -13,9 +11,8 @@ import (
 	"github.com/cloudquery/plugin-sdk/v4/schema"
 	"github.com/cloudquery/plugin-sdk/v4/state"
 	"github.com/cloudquery/plugin-sdk/v4/transformers"
-	"github.com/crowdstrike/gofalcon/falcon"
-	"github.com/justmiles/cq-source-crowdstrike/client"
-	"github.com/justmiles/cq-source-crowdstrike/resources/services"
+	"github.com/nronix/cq-source-crowdstrike/client"
+	"github.com/nronix/cq-source-crowdstrike/resources/services"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -69,21 +66,8 @@ func (c *Client) Sync(ctx context.Context, options plugin.SyncOptions, res chan<
 		c.logger.Info().Str("table_name", options.BackendOptions.TableName).Msg("Connected to state backend")
 	}
 
-	falconClientID := os.Getenv("FALCON_CLIENT_ID")
-	falconSecret := os.Getenv("FALCON_SECRET")
-
-	fc, err := falcon.NewClient(&falcon.ApiConfig{
-		ClientId:     falconClientID,
-		ClientSecret: falconSecret,
-		Debug:        false,
-		Context:      ctx,
-	})
-	if err != nil {
-		return fmt.Errorf("could not auth: %w", err)
-	}
-
-	schedulerClient := client.New(c.logger, c.config, fc, stateClient)
-	err = c.scheduler.Sync(ctx, schedulerClient, tt, res, scheduler.WithSyncDeterministicCQID(options.DeterministicCQID))
+	schedulerClient, _ := client.New(ctx, c.logger, &c.config, stateClient)
+	err = c.scheduler.Sync(ctx, &schedulerClient, tt, res, scheduler.WithSyncDeterministicCQID(options.DeterministicCQID))
 	if err != nil {
 		return fmt.Errorf("failed to sync: %w", err)
 	}
@@ -114,7 +98,7 @@ func Configure(_ context.Context, logger zerolog.Logger, specBytes []byte, opts 
 		}, nil
 	}
 
-	config := client.Spec{}
+	config := &client.Spec{}
 	if err := json.Unmarshal(specBytes, &config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal spec: %w", err)
 	}
@@ -126,7 +110,7 @@ func Configure(_ context.Context, logger zerolog.Logger, specBytes []byte, opts 
 	return &Client{
 		logger:  logger.With().Str("module", "crowdstrike").Logger(),
 		options: opts,
-		config:  config,
+		config:  *config,
 		scheduler: scheduler.NewScheduler(
 			scheduler.WithLogger(logger),
 			scheduler.WithConcurrency(config.Concurrency),
@@ -143,7 +127,6 @@ func getTables() schema.Tables {
 		services.Vulnerabilities(),
 		services.DiscoverApps(),
 		services.DiscoverHosts(),
-    services.ZTAs(),
 	}
 	if err := transformers.TransformTables(tables); err != nil {
 		panic(err)
